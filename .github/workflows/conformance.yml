@@ -17,8 +17,6 @@ on:
   repository_dispatch:
     types: [conformance-test]
   workflow_dispatch:
-  schedule:
-    - cron: '0 */8 * * *'
   pull_request:
     branches:
       - master
@@ -48,46 +46,7 @@ jobs:
       id: pr-components
       run: |
         PR_COMPONENTS=$(yq -I0 --tojson eval - << EOF
-        - bindings.http
-        - bindings.influx
-        - bindings.kafka-wurstmeister
-        - bindings.kafka-confluent
-        - bindings.mqtt-emqx
-        - bindings.mqtt-mosquitto
-        - bindings.mqtt-vernemq
-        - bindings.postgres
-        - bindings.redis
-        - bindings.kubemq
-        - bindings.rabbitmq
-        - pubsub.aws.snssqs
-        - pubsub.hazelcast
-        - pubsub.in-memory
-        - pubsub.mqtt-emqx
-        - pubsub.mqtt-mosquitto
-        - pubsub.mqtt-vernemq
-        - pubsub.natsstreaming
-        - pubsub.pulsar
-        - pubsub.rabbitmq
         - pubsub.redis
-        - pubsub.kafka-wurstmeister
-        - pubsub.kafka-confluent
-        - pubsub.kubemq
-        - secretstores.kubernetes
-        - secretstores.localenv
-        - secretstores.localfile
-        - secretstores.hashicorp.vault
-        - state.cassandra
-        - state.memcached
-        - state.mongodb
-        - state.mysql.mysql
-        - state.mysql.mariadb
-        - state.postgresql
-        - state.redis
-        - state.sqlserver
-        - state.in-memory
-        - state.cockroachdb
-        - workflows.temporal
-        - state.rethinkdb
         EOF
         )
         echo "::set-output name=pr-components::$PR_COMPONENTS"
@@ -150,6 +109,16 @@ jobs:
         )
         echo "::set-output name=cron-components::$CRON_COMPONENTS"
 
+    - name: Specify components requiring secrets or certs
+      id: cron-components
+      run: |
+        CRON_COMPONENTS=$(yq -I0 --tojson eval - << EOF
+        - component: pubsub.aws.snssqs
+          required-secrets: AzureBlobStorageAccessKey,AzureBlobStorageAccount
+        EOF
+        )
+        echo "::set-output name=cron-components::$CRON_COMPONENTS"
+
     - name: Create PR comment
       if: env.PR_NUMBER != ''
       uses: artursouza/sticky-pull-request-comment@v2.2.0
@@ -171,6 +140,10 @@ jobs:
   conformance:
     name: ${{ matrix.component }} conformance
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
+      AWS_DEFAULT_REGION: us-west-2
     defaults:
       run:
         shell: bash
