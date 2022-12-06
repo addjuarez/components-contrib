@@ -1,7 +1,3 @@
-variable "super_secret_variable" {
-    type = "string
-}
-
 resource "aws_sqs_queue" "terraform_queue" {
   name                        = "terraform-example-queue.fifo"
   fifo_queue                  = true
