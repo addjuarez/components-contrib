@@ -17,8 +17,6 @@ on:
   repository_dispatch:
     types: [certification-test]
   workflow_dispatch:
-  schedule:
-    - cron: '5 */12 * * *'
   pull_request:
     branches:
       - master

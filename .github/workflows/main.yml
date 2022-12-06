@@ -10,10 +10,6 @@ jobs:
   terraform:
     name: "Terraform"
     runs-on: ubuntu-latest
-    env:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
-         AWS_DEFAULT_REGION: eu-central-1
 
     steps:
       - name: Checkout
@@ -24,6 +20,9 @@ jobs:
 
       - name: Terraform Init
         id: init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
         run: |
             rm -rf .terraform
             terraform init
@@ -35,9 +34,15 @@ jobs:
         working-directory: "terraform"
 
       - name: Terraform Apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}      
         run: terraform apply -auto-approve
         working-directory: "terraform"
 
       - name: Terraform Destroy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}      
         run: terraform destroy -auto-approve
         working-directory: "terraform"       
