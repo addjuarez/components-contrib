@@ -10,7 +10,9 @@ jobs:
   terraform:
     name: "Terraform"
     runs-on: ubuntu-latest
-
+    env:
+         AWS_DEFAULT_REGION: eu-central-1
+        
     steps:
       - name: Checkout
         uses: actions/checkout@v2
