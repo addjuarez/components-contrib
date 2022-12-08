@@ -110,7 +110,6 @@ jobs:
         echo "::set-output name=cron-components::$CRON_COMPONENTS"
 
     - name: Specify terraform cloud components
-      id: cron-components
       run: |
         CRON_COMPONENTS=$(yq -I0 --tojson eval - << EOF
         - component: pubsub.aws.snssqs
