@@ -160,7 +160,7 @@ func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 				t.Logf("Generated UUID %s", val)
 				configMap[k] = val
 
-			} else if strings.HasPrefix(val, "${{") {
+			} else if strings.Contains(val, "${{") {
 				// look up env var with that name. remove ${{}} and space
 				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
 				v := LookUpEnv(k)
@@ -193,7 +193,7 @@ func parseConfigurationInterfaceMap(t *testing.T, configMap map[interface{}]inte
 				val = uuid.New().String()
 				t.Logf("Generated UUID %s", val)
 				configMap[k] = val
-			} else if strings.HasPrefix(val, "${{") {
+			} else if strings.Contains(val, "${{") {
 				// look up env var with that name. remove ${{}} and space
 				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
 				v := LookUpEnv(k)
