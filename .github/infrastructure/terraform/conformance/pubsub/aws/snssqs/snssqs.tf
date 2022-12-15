@@ -4,7 +4,7 @@ variable "RUN_ID" {
 }
 
 provider "aws" {
-  region = "us-west-2"
+  region = "us-west-1"
 }
 
 resource "aws_sns_topic" "testTopic" {
