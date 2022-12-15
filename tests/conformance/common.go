@@ -188,6 +188,7 @@ func parseConfigurationInterfaceMap(t *testing.T, configMap map[interface{}]inte
 	for k, v := range configMap {
 		switch val := v.(type) {
 		case string:
+			log.Printf("current strong %s : %s", k, v)
 			if strings.EqualFold(val, generateUUID) {
 				// check if generate uuid is specified
 				val = uuid.New().String()
