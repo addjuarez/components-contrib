@@ -154,12 +154,12 @@ func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 	for k, v := range configMap {
 		switch val := v.(type) {
 		case string:
+			log.Printf("current strong %s : %s", k, v)
 			if strings.EqualFold(val, generateUUID) {
 				// check if generate uuid is specified
 				val = uuid.New().String()
 				t.Logf("Generated UUID %s", val)
 				configMap[k] = val
-
 			} else if strings.Contains(val, "${{") {
 				// look up env var with that name. remove ${{}} and space
 				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
