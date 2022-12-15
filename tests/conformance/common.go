@@ -159,6 +159,12 @@ func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 				val = uuid.New().String()
 				t.Logf("Generated UUID %s", val)
 				configMap[k] = val
+
+			} else if strings.HasPrefix(val, "${{") {
+				// look up env var with that name. remove ${{}} and space
+				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
+				v := LookUpEnv(k)
+				configMap[k] = v
 			} else {
 				jsonMap := make(map[string]interface{})
 				err := json.Unmarshal([]byte(val), &jsonMap)
