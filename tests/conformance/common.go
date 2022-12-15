@@ -165,8 +165,9 @@ func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 				configMap[k] = val
 			} else if strings.Contains(val, "${{") {
 				// look up env var with that name. remove ${{}} and space
-				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
-				v := LookUpEnv(k)
+				s := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
+				log.Print(s)
+				v := LookUpEnv(s)
 				log.Print(v)
 				configMap[k] = v
 			} else {
@@ -201,8 +202,9 @@ func parseConfigurationInterfaceMap(t *testing.T, configMap map[interface{}]inte
 				configMap[k] = val
 			} else if strings.Contains(val, "${{") {
 				// look up env var with that name. remove ${{}} and space
-				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
-				v := LookUpEnv(k)
+				s := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
+				log.Print(s)
+				v := LookUpEnv(s)
 				log.Print(v)
 				configMap[k] = v
 			} else {
