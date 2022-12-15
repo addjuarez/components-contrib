@@ -7,38 +7,31 @@ provider "aws" {
   region = "us-west-2"
 }
 
-resource "aws_sns_topic" "testTopic123" {
-  name = "certification-pubsub-topic-active-${var.RUN_ID}"
-  tags = {
-    dapr-topic-name = "certification-pubsub-topic-active-${var.RUN_ID}"
-  }
-}
-
 resource "aws_sns_topic" "testTopic" {
-  name = "testTopic"
+  name = "testTopic-${var.RUN_ID}"
   tags = {
-    dapr-topic-name = "testTopic"
+    dapr-topic-name = "testTopic-${var.RUN_ID}"
   }
 }
 
 resource "aws_sns_topic" "multiTopic1" {
-  name = "multiTopic1"
+  name = "multiTopic1-${var.RUN_ID}""
   tags = {
-    dapr-topic-name = "multiTopic1"
+    dapr-topic-name = "multiTopic1-${var.RUN_ID}"
   }
 }
 
 resource "aws_sns_topic" "multiTopic2" {
-  name = "multiTopic2"
+  name = "multiTopic2-${var.RUN_ID}""
   tags = {
-    dapr-topic-name = "multiTopic2"
+    dapr-topic-name = "multiTopic2-${var.RUN_ID}"
   }
 }
 
 resource "aws_sqs_queue" "testQueue" {
-  name = "testQueue"
+  name = "testQueue-${var.RUN_ID}""
   tags = {
-    dapr-queue-name = "testQueue"
+    dapr-queue-name = "testQueue-${var.RUN_ID}"
   }
 }
 
