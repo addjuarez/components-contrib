@@ -153,6 +153,7 @@ func LookUpEnv(key string) string {
 
 func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 	for k, v := range configMap {
+		log.Print(configMap)
 		switch val := v.(type) {
 		case string:
 			log.Printf("current string %s : %s", k, v)
