@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -155,6 +156,7 @@ func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 		switch val := v.(type) {
 		case string:
 			log.Printf("current string %s : %s", k, v)
+			log.Print(strconv.FormatBool(strings.Contains(val, "${{")))
 			if strings.EqualFold(val, generateUUID) {
 				// check if generate uuid is specified
 				val = uuid.New().String()
@@ -189,6 +191,7 @@ func parseConfigurationInterfaceMap(t *testing.T, configMap map[interface{}]inte
 		switch val := v.(type) {
 		case string:
 			log.Printf("current strong %s : %s", k, v)
+			log.Print(strconv.FormatBool(strings.Contains(val, "${{")))
 			if strings.EqualFold(val, generateUUID) {
 				// check if generate uuid is specified
 				val = uuid.New().String()
