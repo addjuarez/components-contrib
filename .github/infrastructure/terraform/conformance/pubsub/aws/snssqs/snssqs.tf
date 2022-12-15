@@ -15,21 +15,21 @@ resource "aws_sns_topic" "testTopic" {
 }
 
 resource "aws_sns_topic" "multiTopic1" {
-  name = "multiTopic1-${var.RUN_ID}""
+  name = "multiTopic1-${var.RUN_ID}"
   tags = {
     dapr-topic-name = "multiTopic1-${var.RUN_ID}"
   }
 }
 
 resource "aws_sns_topic" "multiTopic2" {
-  name = "multiTopic2-${var.RUN_ID}""
+  name = "multiTopic2-${var.RUN_ID}"
   tags = {
     dapr-topic-name = "multiTopic2-${var.RUN_ID}"
   }
 }
 
 resource "aws_sqs_queue" "testQueue" {
-  name = "testQueue-${var.RUN_ID}""
+  name = "testQueue-${var.RUN_ID}"
   tags = {
     dapr-queue-name = "testQueue-${var.RUN_ID}"
   }
