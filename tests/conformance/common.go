@@ -166,6 +166,7 @@ func ParseConfigurationMap(t *testing.T, configMap map[string]interface{}) {
 				// look up env var with that name. remove ${{}} and space
 				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
 				v := LookUpEnv(k)
+				log.Print(v)
 				configMap[k] = v
 			} else {
 				jsonMap := make(map[string]interface{})
@@ -201,6 +202,7 @@ func parseConfigurationInterfaceMap(t *testing.T, configMap map[interface{}]inte
 				// look up env var with that name. remove ${{}} and space
 				k := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(val, "${{"), "}}"))
 				v := LookUpEnv(k)
+				log.Print(v)
 				configMap[k] = v
 			} else {
 				jsonMap := make(map[string]interface{})
