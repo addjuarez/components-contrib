@@ -9,8 +9,14 @@ terraform {
   }
 }
 
-locals {
-    current_timestamp  = timestamp()
+variable "TIMESTAMP" {
+    type        = string
+    description = "Timestamp of the github worklow run."
+}
+
+variable "UNIQUE_ID" {
+    type        = string
+    description = "Unique Id of the github worklow run."
 }
 
 provider "aws" {
@@ -18,14 +24,9 @@ provider "aws" {
   default_tags {
     tags = {
       Purpose  = "AutomatedTesting"
-      Timestamp = local.current_timestamp
+      Timestamp = "${var.TIMESTAMP}"
     }
   }
-}
-
-variable "UNIQUE_ID" {
-    type        = string
-    description = "Unique Id of the github worklow run."
 }
 
 resource "aws_sns_topic" "testTopic" {
