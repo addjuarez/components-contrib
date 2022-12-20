@@ -9,12 +9,16 @@ terraform {
   }
 }
 
+locals {
+    current_timestamp  = timestamp()
+}
+
 provider "aws" {
   region = "us-east-1"
   default_tags {
     tags = {
       Purpose  = "AutomatedTesting"
-      Timestamp = "123"
+      Timestamp = local.current_timestamp
     }
   }
 }
