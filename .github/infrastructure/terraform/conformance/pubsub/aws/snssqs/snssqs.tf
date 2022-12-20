@@ -13,8 +13,8 @@ provider "aws" {
   region = "us-east-1"
   default_tags {
     tags = {
-      Purpose  = "AutomatedTesting",
-      Timestamp = "${timestamp()}"
+      Purpose  = "AutomatedTesting"
+      Timestamp = "123"
     }
   }
 }
