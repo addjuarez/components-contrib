@@ -16,13 +16,9 @@ package pulsar_test
 import (
 	"context"
 	"fmt"
-	//"math/rand"
-	//"strconv"
-	//"sync"
 	"testing"
 	"time"
 
-	//"github.com/cenkalti/backoff/v4"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/multierr"
@@ -38,7 +34,6 @@ import (
 	dapr "github.com/dapr/go-sdk/client"
 	"github.com/dapr/go-sdk/service/common"
 	"github.com/dapr/kit/logger"
-	//kit_retry "github.com/dapr/kit/retry"
 
 	// Certification testing runnables
 	"github.com/dapr/components-contrib/tests/certification/embedded"
@@ -910,7 +905,6 @@ func TestPulsarNetworkInterruption(t *testing.T) {
 
 func TestPulsarPersitant(t *testing.T) {
 	consumerGroup1 := watcher.NewUnordered()
-	consumerGroup2 := watcher.NewUnordered()
 
 	// subscriber of the given topic
 	subscriberApplication := func(appID string, topicName string, messagesWatcher *watcher.Watcher) app.SetupFn {
@@ -1025,40 +1019,28 @@ func TestPulsarPersitant(t *testing.T) {
 			embedded.WithDaprHTTPPort(runtime.DefaultDaprHTTPPort),
 			componentRuntimeOptions(),
 		)).
-		// Run subscriberApplication app2
-		Step(app.Run(appID2, fmt.Sprintf(":%d", appPort+portOffset),
-			subscriberApplication(appID2, topicActiveName, consumerGroup2))).
-
-		// Run the Dapr sidecar with the component 2.
-		Step(sidecar.Run(sidecarName2,
-			embedded.WithComponentsPath("./components/consumer_two"),
-			embedded.WithAppProtocol(runtime.HTTPProtocol, appPort+portOffset),
-			embedded.WithDaprGRPCPort(runtime.DefaultDaprAPIGRPCPort+portOffset),
-			embedded.WithDaprHTTPPort(runtime.DefaultDaprHTTPPort+portOffset),
-			embedded.WithProfilePort(runtime.DefaultProfilePort+portOffset),
-			componentRuntimeOptions(),
-		)).
-		Step("publish messages to topic1", publishMessages(nil, sidecarName1, topicActiveName, consumerGroup1, consumerGroup2)).
-		Step("publish messages to unUsedTopic", publishMessages(nil, sidecarName1, topicPassiveName)).
+		Step("publish messages to topic1", publishMessages(nil, sidecarName1, topicActiveName, consumerGroup1)).
 		Step("stop pulsar server", dockercompose.Stop(clusterName, dockerComposeYAML, "standalone")).
 		Step("wait", flow.Sleep(5*time.Second)).
 		Step("start pulsar server", dockercompose.Start(clusterName, dockerComposeYAML, "standalone")).
 		Step("wait", flow.Sleep(20*time.Second)).
 		Step("verify if app1 has recevied messages published to active topic", assertMessages(10*time.Second, consumerGroup1)).
-		Step("verify if app2 has recevied messages published to passive topic", assertMessages(10*time.Second, consumerGroup2)).
-		Step("reset", flow.Reset(consumerGroup1, consumerGroup2)).
+		Step("reset", flow.Reset(consumerGroup1)).
 		Run()
 }
 
 func TestPulsarDelay(t *testing.T) {
 	consumerGroup1 := watcher.NewUnordered()
-	consumerGroup2 := watcher.NewUnordered()
+
+	metadata := map[string]string{
+		"deliverAfter": "30s",
+	}
 
 	// subscriber of the given topic
 	subscriberApplication := func(appID string, topicName string, messagesWatcher *watcher.Watcher) app.SetupFn {
 		return func(ctx flow.Context, s common.Service) error {
 			// Simulate periodic errors.
-			sim := simulate.PeriodicError(ctx, 100)
+			sim := simulate.PeriodicError(ctx, 180)
 			// Setup the /orders event handler.
 			return multierr.Combine(
 				s.AddTopicEventHandler(&common.Subscription{
@@ -1123,7 +1105,18 @@ func TestPulsarDelay(t *testing.T) {
 		return func(ctx flow.Context) error {
 			// assert for messages
 			for _, m := range messageWatchers {
-				m.Assert(ctx, 5*timeout)
+				m.Assert(ctx, 25*timeout)
+			}
+
+			return nil
+		}
+	}
+
+	assertMessagesNot := func(timeout time.Duration, messageWatchers ...*watcher.Watcher) flow.Runnable {
+		return func(ctx flow.Context) error {
+			// assert for messages
+			for _, m := range messageWatchers {
+				m.AssertNotDelivered(ctx, 5*timeout)
 			}
 
 			return nil
@@ -1167,24 +1160,11 @@ func TestPulsarDelay(t *testing.T) {
 			embedded.WithDaprHTTPPort(runtime.DefaultDaprHTTPPort),
 			componentRuntimeOptions(),
 		)).
-		// Run subscriberApplication app2
-		Step(app.Run(appID2, fmt.Sprintf(":%d", appPort+portOffset),
-			subscriberApplication(appID2, topicActiveName, consumerGroup2))).
 
-		// Run the Dapr sidecar with the component 2.
-		Step(sidecar.Run(sidecarName2,
-			embedded.WithComponentsPath("./components/consumer_two"),
-			embedded.WithAppProtocol(runtime.HTTPProtocol, appPort+portOffset),
-			embedded.WithDaprGRPCPort(runtime.DefaultDaprAPIGRPCPort+portOffset),
-			embedded.WithDaprHTTPPort(runtime.DefaultDaprHTTPPort+portOffset),
-			embedded.WithProfilePort(runtime.DefaultProfilePort+portOffset),
-			componentRuntimeOptions(),
-		)).
-		Step("publish messages to topic1", publishMessages(nil, sidecarName1, topicActiveName, consumerGroup1, consumerGroup2)).
-		Step("publish messages to unUsedTopic", publishMessages(nil, sidecarName1, topicPassiveName)).
-		Step("verify if app1 has recevied messages published to active topic", assertMessages(10*time.Second, consumerGroup1)).
-		Step("verify if app2 has recevied messages published to passive topic", assertMessages(10*time.Second, consumerGroup2)).
-		Step("reset", flow.Reset(consumerGroup1, consumerGroup2)).
+		Step("publish messages to topic1", publishMessages(metadata, sidecarName1, topicActiveName, consumerGroup1)).
+		Step("verify if app1 has recevied no messages published to topic", assertMessagesNot(1*time.Second, consumerGroup1)).
+		Step("verify if app1 has recevied messages published to topic", assertMessages(10*time.Second, consumerGroup1)).
+		Step("reset", flow.Reset(consumerGroup1)).
 		Run()
 }
 

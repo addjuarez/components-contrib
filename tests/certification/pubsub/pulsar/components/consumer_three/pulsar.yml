@@ -11,4 +11,4 @@ spec:
   - name: consumerID
     value: certification3
   - name: redeliveryDelay
-    value: 60s
+    value: 200ms
