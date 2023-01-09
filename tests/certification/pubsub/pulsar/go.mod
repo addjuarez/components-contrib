@@ -14,6 +14,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/multierr v1.8.0
+	github.com/apache/pulsar-client-go v0.9.0
 )
 
 require (

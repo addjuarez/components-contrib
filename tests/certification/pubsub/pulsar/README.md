@@ -1,56 +1,54 @@
-# Kafka certifcation testing
+### Pulsar Pubsub Certification
 
-This project aims to test the Kafka Pub/Sub component under various conditions.
+The purpose of this module is to provide tests that certify the Pulsar Pubsub as a stable component.
 
-## Test plan
-
-### Basic tests
-
-* Bring up a 3-node Kafka cluster
-    * Configured to have 10+ partitions per topic
-* Start 1 sidecar/application
-    * Test: Send 1000+ unique messages with keys set
-    * App: Simulate periodic errors
-    * Component: Retries on error
-    * App: Observes successful messages
-    * Test: Confirms that all expected messages were received (in order)
-
-### Kafka infra tests
-
-* Start a constant flow of publishing and subscribing
-    * Test: Keeps count of total sent/received
-* Start a second sidecar/application using a different consumer group
-    * Test: Publishes a specific amount of messages
-    * Each consumer group should receive all messages
-* Start third consumer with a matching consumer group
-    * Test: Publishes a specific amount of messages
-    * Component: Between the each of the consumers in the group, all messages should be consumed, but not necessarily in order.
-* Stop 1 broker node so that 2 of 3 are active
-    * The 2 applications should handle the server rebalance
-* Stop another broker so that 1 of 3 are active (loss of quorum)
-    * Test: Begins trying to reconnect & publish
-    * Component: Begins trying to reconnect & re-subscribe
-* Stop the last broker so that 0 of 3 are active (complete outage)
-    * Same as reconnection behavior above
-* Restart both brokers so that 3 of 3 are active
-    * Test & Component: Reconnect
-    * Count of total sent should equal total received
-* Stop consumer with >1 sidecar subscribed
-    * Test: Publishes messages in the background
-    * Component: Handles a consumer rebalance
-
-### Network tests
-
-* Simulate network interruption
-    * Test: Begins trying to reconnect & publish
-    * Component: Begins trying to reconnect & re-subscribe
-
-### Data integrity tests
-
-* **TODO** Start a new sidecar/application
-* **TODO** Verify cloud events 
-    * **TODO** Publish various cloud events
-    * **TODO** App receives Kafka messages and verifies their binary encoding
-* **TODO** Verify raw events
-    * **TODO** Publish various raw events
-    * **TODO** App receives Kafka messages and verifies their binary encoding
+**Certification Tests**
+- Verify with single publisher / single subscriber
+   - Run dapr application with 1 publisher and 1 subscriber
+   - Publisher publishes to 2 topics
+   - Subscriber is subscribed to 1 topic
+   - Simulate periodic errors and verify that the component retires on error
+   - Verify that all expected messages were received
+   - Verify that subscriber does not receive messages from the non-subscribed topic
+- Verify with single publisher / multiple subscribers with same consumerID
+   - Run dapr application with 1 publisher and 2 subscribers
+   - Publisher publishes to 1 topic
+   - Subscriber is subscribed to 1 topic
+   - Simulate periodic errors and verify that the component retires on error
+   - Verify that all expected messages were received
+- Verify with single publisher / multiple subscribers with different consumerIDs
+   - Run dapr application with 1 publisher and 2 subscribers
+   - Publisher publishes to 1 topic
+   - Subscriber is subscribed to 1 topic
+   - Simulate periodic errors and verify that the component retires on error
+   - Verify that all expected messages were received
+- Verify with multiple publishers / multiple subscribers with different consumerIDs
+   - Run dapr application with 2 publishers and 2 subscribers
+   - Publisher publishes to 1 topic
+   - Subscriber is subscribed to 1 topic
+   - Simulate periodic errors and verify that the component retires on error
+   - Verify that all expected messages were received
+- Verify data with a topic that does not exist
+   - Run dapr application with 1 publisher and 1 subscriber
+   - Verify the creation of topic
+   - Send messages to the topic created
+   - Verify that subscriber received all the messages
+- Verify reconnection after the network interruptions
+   - Run dapr application with 1 publisher and 1 subscriber
+   - Publisher publishes to 1 topic
+   - Subscriber is subscribed to 1 topic
+   - Simulate network interruptions and verify that the component retires on error
+   - Verify that all expected messages were received
+- Verify data with an optional parameter delayqueue set
+   - Run dapr application with 1 publisher and 1 subscriber
+   - Publisher publishes to 1 topic
+   - Subscriber is subscribed to 1 topic
+   - Verify that subscriber has not immediately recieved messages
+   - Wait for message delay to pass
+   - Verify that all expected messages were received
+- Verify data with persistent topics after pulsar restart
+   - Run dapr application with 1 publisher and 1 subscriber
+   - Publisher publishes to 1 topic
+   - Restart pulsar service
+   - Subscriber is subscribed to 1 topic
+   - Verify that all expected messages were received
